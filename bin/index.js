@@ -24,7 +24,7 @@ const createSnapshot = (gitHash) => {
             version[1] = `${parseInt(version[1]) + 1}`;
 
             console.log('Stitching snapshot version back together...');
-            packageJson.version = `${version[0]}.${version[1]}.0}-${gitHash}-SNAPSHOT`;
+            packageJson.version = `${version[0]}.${version[1]}.0-${gitHash}-SNAPSHOT`;
         } else {
             console.log('Previous snapshot found!');
             const dashSegments = currentVer.split('-');
