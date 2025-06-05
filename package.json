@@ -1,18 +1,13 @@
 {
   "name": "snapshot-creator",
-  "version": "1.0.2",
+  "version": "1.1.0-069fe694b7138d6ceab5abc3b62c8b1f324221fd-SNAPSHOT",
   "description": "A CLI to create snapshots for testing packages based on your most recent git hash",
   "main": "./bin/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "snapshot",
-    "create"
-  ],
-  "bin": {
-    "ss": "./bin/index.js"
-  },
+  "keywords": [ "snapshot", "create" ],
+  "bin": { "ss": "./bin/index.js" },
   "author": "Zach Shuffield",
   "license": "ISC",
   "dependencies": {
