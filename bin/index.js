@@ -2,7 +2,6 @@
 const yargs = require("yargs");
 const utils = require('./utils.js');
 const fs = require('fs');
-var beautify = require("json-beautify");
 const path = require('path');
 const runtimeDirectory = process.cwd();
 
@@ -62,7 +61,7 @@ const addToWorkspaceAfterPublish = (packageJson, gitHash) => {
     };
 
     // Check if package already exists and update it, or add new entry
-    const existingIndex = workspace.packages.findIndex(pkg => 
+    const existingIndex = workspace.packages.findIndex(pkg =>
         pkg.name === packageEntry.name && pkg.path === packageEntry.path
     );
 
@@ -91,19 +90,19 @@ const publishToWorkspace = (argv) => {
     }
 
     console.log(`Publishing ${packageJson.name}@${packageJson.version}...`);
-    
+
     try {
         // Attempt to publish the package
         const publishResult = require('child_process')
-            .execSync('npm publish', { 
+            .execSync('npm publish', {
                 cwd: runtimeDirectory,
                 stdio: 'pipe',
                 encoding: 'utf8'
             });
-        
+
         console.log('✅ Package published successfully!');
         console.log(publishResult);
-        
+
         // Only add to workspace after successful publish
         const gitHash = extractLatestGitRevisionHash();
         if (addToWorkspaceAfterPublish(packageJson, gitHash)) {
@@ -111,16 +110,16 @@ const publishToWorkspace = (argv) => {
         } else {
             console.log('⚠️  Package published but failed to add to workspace');
         }
-        
+
     } catch(e) {
-        console.log('❌ Failed to publish package');
-        if (e.stdout) {
-            console.log('npm output:', e.stdout);
-        }
-        if (e.stderr) {
-            console.log('npm error:', e.stderr);
-        }
-        utils.errorLog(e, 'Package was not added to workspace due to publish failure');
+      if (e.stdout) {
+        console.log('npm output:', e.stdout);
+      }
+      if (e.stderr) {
+        console.log('npm error:', e.stderr);
+      }
+      utils.errorLog(e, 'Package was not added to workspace due to publish failure');
+      console.log('❌ Failed to publish package');
     }
 }
 
@@ -164,14 +163,19 @@ const clearWorkspace = (argv) => {
 
 const createSnapshot = (gitHash) => {
     let packageJson = null;
+    let originalJsonStr = '';
     try {
-        packageJson = require(`${runtimeDirectory}/package.json`);
+        originalJsonStr = fs.readFileSync(`${runtimeDirectory}/package.json`);
+        packageJson = JSON.parse(originalJsonStr);
     } catch(e) {
         utils.errorLog(e, 'Oops! Can\'t seem to find your package json.');
+        return;
     }
 
     if (packageJson) {
         const currentVer = packageJson.version;
+        let newVersion = '';
+
         if((currentVer.toLowerCase()).indexOf('snapshot') === -1) {
             console.log('Creating brand new snapshot...');
             const dashSegments = currentVer.split('-');
@@ -181,17 +185,17 @@ const createSnapshot = (gitHash) => {
             version[1] = `${parseInt(version[1]) + 1}`;
 
             console.log('Stitching snapshot version back together...');
-            packageJson.version = `${version[0]}.${version[1]}.0-${gitHash}-SNAPSHOT`;
+            newVersion = `${version[0]}.${version[1]}.0-${gitHash}-SNAPSHOT`;
         } else {
             console.log('Previous snapshot found!');
             const dashSegments = currentVer.split('-');
 
             console.log('Replacing hash...');
-            packageJson.version = `${dashSegments[0]}-${gitHash}-SNAPSHOT`;
+            newVersion = `${dashSegments[0]}-${gitHash}-SNAPSHOT`;
         }
 
         try {
-            fs.writeFile(`${runtimeDirectory}/package.json`, `${beautify(packageJson, null, 2, 60)}\n`, {}, () => {});
+            fs.writeFileSync(`${runtimeDirectory}/package.json`, utils.getJsonStrWithUpdatedVersion(originalJsonStr, newVersion));
         } catch(e) {
             utils.errorLog(e, 'Oops! Can\'t seem to write the changes back to your package.json');
         }
@@ -208,16 +212,18 @@ const mainFunc = (argv) => {
     try {
         const gitHash = extractLatestGitRevisionHash();
         createSnapshot(gitHash);
+        console.log('Success!');
     } catch(e) {
-        utils.errorLog(e, 'An error has occurred. You man not currently be using this command in a git repo');
+        utils.errorLog(e, 'An error has occurred. You may not currently be using this command in a git repo');
     }
-    console.log('Success!');
 }
 
 const syncWorkspace = (argv) => {
     let packageJson = null;
+    let originalJsonStr = '';
     try {
-        packageJson = require(`${runtimeDirectory}/package.json`);
+        originalJsonStr = fs.readFileSync(`${runtimeDirectory}/package.json`);
+        packageJson = JSON.parse(originalJsonStr);
     } catch(e) {
         utils.errorLog(e, 'Oops! Can\'t seem to find your package.json in current directory.');
         return;
@@ -230,7 +236,7 @@ const syncWorkspace = (argv) => {
     }
 
     console.log(`Syncing dependencies for ${packageJson.name}...`);
-    
+
     // Create a map of workspace packages for quick lookup
     const workspacePackages = {};
     workspace.packages.forEach(pkg => {
@@ -240,18 +246,19 @@ const syncWorkspace = (argv) => {
     let updatedCount = 0;
     let skippedCount = 0;
     const updateResults = [];
+    let updatedJsonStr = originalJsonStr;
 
     // Helper function to update dependencies in a specific section
     const updateDependencySection = (sectionName, dependencies) => {
         if (!dependencies) return;
-        
+
         Object.keys(dependencies).forEach(depName => {
             if (workspacePackages[depName]) {
                 const oldVersion = dependencies[depName];
                 const newVersion = workspacePackages[depName];
-                
+
                 if (oldVersion !== newVersion) {
-                    dependencies[depName] = newVersion;
+                    updatedJsonStr = utils.getJsonStrWithUpdatedDependency(updatedJsonStr, depName, newVersion, sectionName);
                     updatedCount++;
                     updateResults.push({
                         name: depName,
@@ -281,21 +288,21 @@ const syncWorkspace = (argv) => {
 
     if (updatedCount > 0) {
         try {
-            // Write the updated package.json
-            fs.writeFileSync(`${runtimeDirectory}/package.json`, `${beautify(packageJson, null, 2, 60)}\n`);
+            // Write the updated jsonStr back to package.json
+            fs.writeFileSync(`${runtimeDirectory}/package.json`, updatedJsonStr);
             console.log(`\n✅ Successfully updated ${updatedCount} dependencies!`);
-            
+
             if (skippedCount > 0) {
                 console.log(`ℹ️  ${skippedCount} dependencies were already up to date.`);
             }
-            
+
             console.log('\n📋 Summary of changes:');
             updateResults.forEach(result => {
                 console.log(`   ${result.name} (${result.section}): ${result.oldVersion} → ${result.newVersion}`);
             });
-            
+
             console.log('\n💡 Don\'t forget to run "npm install" to install the updated dependencies.');
-            
+
         } catch(e) {
             utils.errorLog(e, 'Failed to write updated package.json');
         }
@@ -328,7 +335,7 @@ const addToWorkspace = (argv) => {
     };
 
     // Check if package already exists and update it, or add new entry
-    const existingIndex = workspace.packages.findIndex(pkg => 
+    const existingIndex = workspace.packages.findIndex(pkg =>
         pkg.name === packageEntry.name && pkg.path === packageEntry.path
     );
 
@@ -360,5 +367,5 @@ const options = yargs
             .demandCommand(1, 'You need to specify a workspace command (publish, list, clear, sync, or add)')
             .help();
     })
-    .help(true)  
+    .help(true)
     .argv;
