@@ -4,9 +4,10 @@ const errorLog = (e, customLog) => {
     console.log(customLog);
 }
 
-const getJsonStrWithUpdatedDependency = (jsonStr, packageName, newVersion) => {
-    const dependencyRegex = new RegExp(`("${packageName}"\\s*:\\s*")[^"]*(")`);
-    return jsonStr.replace(dependencyRegex, `$1${newVersion}$2`);
+const getJsonStrWithUpdatedDependency = (jsonStr, packageName, newVersion, section = 'dependencies') => {
+    // matches the dependency within the specific section
+    const sectionRegex = new RegExp(`("${section}"\\s*:\\s*{[^}]*?"${packageName}"\\s*:\\s*")[^"]*(")`);
+    return jsonStr.replace(sectionRegex, `$1${newVersion}$2`);
 };
 
 const getJsonStrWithUpdatedVersion = (jsonStr, newVersion) => {
