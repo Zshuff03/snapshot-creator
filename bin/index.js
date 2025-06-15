@@ -222,7 +222,7 @@ const syncWorkspace = (argv) => {
     let packageJson = null;
     let originalJsonStr = '';
     try {
-        originalJsonStr = fs.readFileSync(`${runtimeDirectory}/package.json`);
+        originalJsonStr = fs.readFileSync(`${runtimeDirectory}/package.json`, 'utf8');
         packageJson = JSON.parse(originalJsonStr);
     } catch(e) {
         utils.errorLog(e, 'Oops! Can\'t seem to find your package.json in current directory.');
