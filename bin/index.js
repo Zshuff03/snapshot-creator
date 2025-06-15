@@ -112,14 +112,14 @@ const publishToWorkspace = (argv) => {
         }
 
     } catch(e) {
-      if (e.stdout) {
-        console.log('npm output:', e.stdout);
-      }
-      if (e.stderr) {
-        console.log('npm error:', e.stderr);
-      }
-      utils.errorLog(e, 'Package was not added to workspace due to publish failure');
-      console.log('❌ Failed to publish package');
+        if (e.stdout) {
+            console.log('npm output:', e.stdout);
+        }
+        if (e.stderr) {
+            console.log('npm error:', e.stderr);
+        }
+        utils.errorLog(e, 'Package was not added to workspace due to publish failure');
+        console.log('❌ Failed to publish package');
     }
 }
 
