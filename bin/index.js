@@ -548,56 +548,70 @@ const addToWorkspace = (argv) => {
 };
 
 const usage = "\nUsage: ss <command> [options]";
-const options = yargs
-    .usage(usage)
-    .command(['build', 'create', '$0'], 'Create and add a new snapshot version to the package.json for the git repo you are currently in!', (yargs) => {
-        return yargs.option('workspace', {
-            alias: 'w',
-            describe: 'Include workspace name in the snapshot version',
-            type: 'boolean',
-            default: false
-        });
-    }, mainFunc)
-    .command(['publish'], 'Publish current package to npm and add to workspace on success', () => {}, publishToWorkspace)
-    .command(['workspace', 'ws'], 'Manage your snapshot workspaces', (yargs) => {
-        return yargs
-            .command('publish', 'Publish current package to npm and add to workspace on success', () => {}, publishToWorkspace)
-            .command('list', 'List all packages in current workspace', (yargs) => {
-                return yargs.option('name', {
-                    alias: 'n',
-                    describe: 'Workspace name to list (defaults to current workspace)',
-                    type: 'string'
-                });
-            }, listWorkspace)
-            .command('clear', 'Clear a workspace', (yargs) => {
-                return yargs.option('name', {
-                    alias: 'n',
-                    describe: 'Workspace name to clear (defaults to current workspace)',
-                    type: 'string'
-                });
-            }, clearWorkspace)
-            .command('sync', 'Sync workspace versions to package.json dependencies', () => {}, syncWorkspace)
-            .command('add', 'Add current package to workspace without publishing', () => {}, addToWorkspace)
-            .command('create', 'Create a new workspace', (yargs) => {
-                return yargs.option('name', {
-                    alias: 'n',
-                    describe: 'Name of the workspace to create',
-                    type: 'string',
-                    demandOption: true
-                });
-            }, createWorkspace)
-            .command('use', 'Switch to a different workspace', (yargs) => {
-                return yargs.option('name', {
-                    alias: 'n',
-                    describe: 'Name of the workspace to switch to',
-                    type: 'string',
-                    demandOption: true
-                });
-            }, switchWorkspace)
-            .command('current', 'Show current workspace', () => {}, getCurrentWorkspace)
-            .command('ls', 'List all available workspaces', () => {}, listWorkspaces)
-            .demandCommand(1, 'You need to specify a workspace command')
-            .help();
-    })
+
+yargs
+.usage(usage)
+.command(['build', 'create', '$0'], 'Create and add a new snapshot version to the package.json for the git repo you are currently in!',
+    (yargs) => yargs.option('workspace', {
+        alias: 'w',
+        describe: 'Include workspace name in the snapshot version',
+        type: 'boolean',
+        default: false
+    }),
+    mainFunc
+)
+.command(['publish'], 'Publish current package to npm and add to workspace on success', () => {}, publishToWorkspace)
+.command(['workspace', 'ws'], 'Manage your snapshot workspaces',
+    (yargs) => yargs
+        .command('publish', 'Publish current package to npm and add to workspace on success', () => {}, publishToWorkspace)
+        .command(
+            'list',
+            'List all packages in current workspace',
+            (yargs) => yargs.option('name', {
+                alias: 'n',
+                describe: 'Workspace name to list (defaults to current workspace)',
+                type: 'string'
+            }),
+            listWorkspace
+        )
+        .command(
+            'clear',
+            'Clear a workspace',
+            (yargs) => yargs.option('name', {
+                alias: 'n',
+                describe: 'Workspace name to clear (defaults to current workspace)',
+                type: 'string'
+            }),
+            clearWorkspace
+        )
+        .command('sync', 'Sync workspace versions to package.json dependencies', () => {}, syncWorkspace)
+        .command('add', 'Add current package to workspace without publishing', () => {}, addToWorkspace)
+        .command(
+            'create',
+            'Create a new workspace',
+            (yargs) => yargs.option('name', {
+                alias: 'n',
+                describe: 'Name of the workspace to create',
+                type: 'string',
+                demandOption: true
+            }),
+            createWorkspace
+        )
+        .command(
+            'use',
+            'Switch to a different workspace',
+            (yargs) => yargs.option('name', {
+                alias: 'n',
+                describe: 'Name of the workspace to switch to',
+                type: 'string',
+                demandOption: true
+            }),
+            switchWorkspace
+        )
+        .command('current', 'Show current workspace', () => {}, getCurrentWorkspace)
+        .command('ls', 'List all available workspaces', () => {}, listWorkspaces)
+        .demandCommand(1, 'You need to specify a workspace command')
+        .help()
+    )
     .help(true)
     .argv;
