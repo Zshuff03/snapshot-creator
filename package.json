@@ -1,6 +1,6 @@
 {
   "name": "snapshot-creator",
-  "version": "2.0.0-beta.2",
+  "version": "2.0.0",
   "description": "A CLI to create snapshots for testing packages based on your most recent git hash",
   "main": "./bin/index.js",
   "scripts": {
