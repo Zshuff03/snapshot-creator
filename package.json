@@ -16,7 +16,6 @@
   "author": "Zach Shuffield",
   "license": "ISC",
   "dependencies": {
-    "json-beautify": "^1.1.1",
     "yargs": "^17.7.2"
   }
 }

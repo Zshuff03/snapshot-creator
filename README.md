@@ -8,17 +8,27 @@ Just install the package globally with this command: `npm i snapshot-creator -g`
 
 ### Creating Snapshots
 - `ss` or `ss build` or `ss create` - Create a snapshot version for the current package
+- `ss --workspace` or `ss -w` - Create a snapshot version that includes the current workspace name as a slug (e.g., `2.1.0-hash-FV-1234-SNAPSHOT`)
 
 ### Workspace Management
-The workspace feature allows you to track published packages across different projects.
+The workspace feature allows you to manage multiple named workspaces to track published packages across different projects and environments.
 
-- `ss workspace add` - Add the current package to your workspace without publishing
-- `ss workspace publish` - Publish the current package to npm and add it to your workspace on successful publish
-- `ss workspace list` - List all packages saved in your workspace  
-- `ss workspace sync` - Update current package.json dependencies to match workspace versions
-- `ss workspace clear` - Clear all packages from your workspace
+#### Basic Workspace Commands
+- `ss workspace add` - Add the current package to your current workspace without publishing
+- `ss workspace publish` - Publish the current package to npm and add it to your current workspace on successful publish
+- `ss workspace list` - List all packages in the current workspace
+- `ss workspace list --name <workspace>` - List all packages in a specific workspace
+- `ss workspace sync` - Update current package.json dependencies to match current workspace versions
+- `ss workspace clear` - Clear all packages from the current workspace
+- `ss workspace clear --name <workspace>` - Clear all packages from a specific workspace
 
-The workspace data is stored in `~/.snapshot-creator-workspace.json` and persists across different projects and terminal sessions. Packages added with `publish` are marked as published, while those added with `add` are marked as unpublished.
+#### Multi-Workspace Management
+- `ss workspace create --name <workspace>` - Create a new workspace
+- `ss workspace use --name <workspace>` - Switch to a different workspace
+- `ss workspace current` - Show the current active workspace
+- `ss workspace ls` - List all available workspaces
+
+The workspace data is stored in `~/.snapshot-creator/` directory with separate files for each workspace and a config file to track the current workspace. This allows you to maintain separate package collections for different projects or tickets (e.g. FV-1234).
 
 ## Usage Examples
 
@@ -26,20 +36,38 @@ The workspace data is stored in `~/.snapshot-creator-workspace.json` and persist
 # Create a snapshot for current package
 ss
 
-# Add current package to workspace without publishing
+# Create a snapshot with workspace name included
+ss --workspace
+# or
+ss -w
+
+# Create and manage workspaces
+ss workspace create --name development
+ss workspace create --name production
+ss workspace ls                    # List all workspaces
+ss workspace current              # Show current workspace
+ss workspace use --name development
+
+# Add current package to current workspace without publishing
 ss workspace add
 
-# Publish current package to npm and add to workspace
+# Publish current package to npm and add to current workspace
 ss workspace publish
 
-# View all packages in workspace
+# View all packages in current workspace
 ss workspace list
 
-# Update current package.json dependencies to workspace versions
+# View packages in a specific workspace
+ss workspace list --name production
+
+# Update current package.json dependencies to current workspace versions
 ss workspace sync
 
-# Clear workspace
+# Clear current workspace
 ss workspace clear
+
+# Clear a specific workspace
+ss workspace clear --name development
 ```
 
 Happy snapshotting!
