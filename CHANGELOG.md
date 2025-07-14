@@ -1,4 +1,7 @@
 ## Changelog
+- Version 2.0.0
+  - Workspaces!
+
 - Version 1.0.2
   - typo -- remove '}' from snapshot
 
