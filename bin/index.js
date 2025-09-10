@@ -191,7 +191,7 @@ const createSnapshot = (gitHash) => {
         }
 
         try {
-            fs.writeFile(`${runtimeDirectory}/package.json`, `${beautify(packageJson, null, 2, 60)}\n`, {}, () => {});
+            fs.writeFile(`${runtimeDirectory}/package.json`, `${beautify(packageJson, null, 2, 10)}\n`, {}, () => {});
         } catch(e) {
             utils.errorLog(e, 'Oops! Can\'t seem to write the changes back to your package.json');
         }
@@ -282,7 +282,7 @@ const syncWorkspace = (argv) => {
     if (updatedCount > 0) {
         try {
             // Write the updated package.json
-            fs.writeFileSync(`${runtimeDirectory}/package.json`, `${beautify(packageJson, null, 2, 60)}\n`);
+            fs.writeFileSync(`${runtimeDirectory}/package.json`, `${beautify(packageJson, null, 2, 10)}\n`);
             console.log(`\n✅ Successfully updated ${updatedCount} dependencies!`);
             
             if (skippedCount > 0) {
