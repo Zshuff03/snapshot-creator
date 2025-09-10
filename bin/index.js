@@ -95,7 +95,7 @@ const publishToWorkspace = (argv) => {
     try {
         // Attempt to publish the package
         const publishResult = require('child_process')
-            .execSync('npm publish', { 
+            .execSync('npm publish --tag snapshot', { 
                 cwd: runtimeDirectory,
                 stdio: 'pipe',
                 encoding: 'utf8'
