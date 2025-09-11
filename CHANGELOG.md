@@ -1,4 +1,8 @@
 ## Changelog
+- Version 2.1.0
+  - Fix package.json write reformatting
+  - Add support for snapshot publishes outside of jfrom (GAR)
+
 - Version 2.0.0
   - Workspaces!
 
